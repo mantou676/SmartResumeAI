@@ -1,0 +1,43 @@
+# SmartResumeAI - Serverless Devs FC3 部署配置
+edition: 3.0.0
+name: SmartResumeAI
+access: default
+
+vars:
+  region: cn-hangzhou
+
+resources:
+  SmartResumeAI-backend:
+    component: fc3
+    props:
+      region: ${vars.region}
+      functionName: smart-resume-ai
+      description: AI 赋能的智能简历分析系统
+      runtime: custom
+      code: ./backend
+      memorySize: 512
+      cpu: 0.5
+      timeout: 60
+      diskSize: 512
+      instanceConcurrency: 5
+      environmentVariables:
+        DASHSCOPE_API_KEY: ${env(DASHSCOPE_API_KEY)}
+        REDIS_HOST: ${env(REDIS_HOST)}
+        REDIS_PORT: ${env(REDIS_PORT)}
+        REDIS_PASSWORD: ${env(REDIS_PASSWORD)}
+        LOG_LEVEL: INFO
+      customRuntimeConfig:
+        command:
+          - /code/bootstrap
+        port: 9000
+      triggers:
+        - triggerName: http
+          triggerType: http
+          qualifier: LATEST
+          triggerConfig:
+            methods:
+              - GET
+              - POST
+              - OPTIONS
+            authType: anonymous
+            disableURLInternet: false

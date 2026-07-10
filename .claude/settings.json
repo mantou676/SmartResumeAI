@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "mcp__filesystem__create_directory",
+      "Bash(npm run *)"
+    ]
+  }
+}

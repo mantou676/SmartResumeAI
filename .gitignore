@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+.venv/
+venv/
+.env
+*.egg
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 临时文件
+*.log
+*.tmp
+
+# 上传的简历文件 (调试用)
+uploads/
+
+# Serverless Devs
+.s/
+
+# Node & Frontend
+node_modules/
+frontend/dist/
+dist/
