@@ -1,5 +1,7 @@
 # 📄 SmartResumeAI — AI 赋能的智能简历分析系统
 
+> 🕐 **本项目严格按照笔试需求，24 小时内独立完成全功能开发。** 包含 PDF 解析、AI 信息提取、岗位匹配评分、缓存机制、前端交互页面及线上部署。
+>
 > 上传 PDF 简历 → AI 提取关键信息 → 岗位匹配评分，帮助招聘者快速筛选候选人。
 
 [![Tech Stack](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi)](https://fastapi.tiangolo.com/)

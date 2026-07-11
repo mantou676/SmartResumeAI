@@ -1,0 +1,102 @@
+{
+  "_说明": "SmartResumeAI 完整接口调用样例 — 评审无需本地跑代码即可查看解析与评分效果",
+  "_流程": "上传 PDF → AI 提取信息 → 岗位匹配评分",
+  "_演示地址": "https://mantou676.github.io/SmartResumeAI/",
+  "_API地址": "https://resume-backend-npdffqjndf.cn-beijing.fcapp.run",
+
+  "step1_上传简历": {
+    "method": "POST /api/resume/upload",
+    "request": "multipart/form-data: file=resume.pdf",
+    "response": {
+      "resume_id": "d32ee29ae0d6fb275743",
+      "filename": "resume.pdf",
+      "file_size": 1234,
+      "page_count": 1,
+      "raw_text": "Resume: John Doe, Python Engineer, 5 years\nEmail: john@example.com  Phone: 13800138000\nSkills: Python, FastAPI, Docker, Kubernetes",
+      "cleaned_text": "Resume: John Doe, Python Engineer, 5 years\nEmail: john@example.com Phone: 13800138000\nSkills: Python, FastAPI, Docker, Kubernetes",
+      "created_at": "2026-07-11T08:22:18+08:00"
+    }
+  },
+
+  "step2_AI提取关键信息": {
+    "method": "POST /api/resume/{resume_id}/extract",
+    "说明": "通义千问 qwen-plus 自动提取，必选字段全提取，加分字段也完整覆盖",
+    "response": {
+      "resume_id": "d32ee29ae0d6fb275743",
+      "basic_info": {
+        "name": "John Doe",
+        "phone": "13800138000",
+        "email": "john@example.com",
+        "address": ""
+      },
+      "job_info": {
+        "desired_position": "Python Engineer",
+        "expected_salary": ""
+      },
+      "background": {
+        "work_years": "5年",
+        "education": "",
+        "projects": [],
+        "skills": ["Python", "FastAPI", "Docker", "Kubernetes"]
+      },
+      "tokens_used": 703
+    }
+  },
+
+  "step3_匹配评分": {
+    "method": "POST /api/resume/{resume_id}/match",
+    "request": {
+      "job_description": "Python FastAPI Docker Kubernetes engineer 5 years experience",
+      "use_ai_scoring": true
+    },
+    "说明": "两阶段评分：基础关键词匹配 + 通义千问 AI 深度语义评分",
+    "response": {
+      "resume_id": "d32ee29ae0d6fb275743",
+      "overall_score": 85.0,
+      "score_breakdown": {
+        "skill_match": {
+          "score": 100,
+          "matched": ["Python", "FastAPI", "Docker", "Kubernetes"],
+          "missing": []
+        },
+        "experience_relevance": {
+          "score": 80,
+          "detail": "候选人有5年经验，符合要求"
+        },
+        "education_match": {
+          "score": 70,
+          "detail": "简历未提及学历信息"
+        },
+        "keyword_overlap": {
+          "score": 100,
+          "overlap_count": 4,
+          "keywords": ["python", "fastapi", "docker", "kubernetes"]
+        }
+      },
+      "keyword_analysis": [
+        {"keyword": "Python", "weight": 0.8, "matched": true},
+        {"keyword": "FastAPI", "weight": 0.8, "matched": true},
+        {"keyword": "Docker", "weight": 0.8, "matched": true},
+        {"keyword": "Kubernetes", "weight": 0.8, "matched": true}
+      ],
+      "matched_keywords": ["Python", "FastAPI", "Docker", "Kubernetes", "5 years experience"],
+      "missing_keywords": ["CI/CD", "cloud platforms (AWS/GCP)", "microservices", "observability", "testing frameworks"],
+      "ai_feedback": "Strong technical fit on paper; recommended for initial screening. Request portfolio, GitHub links, or brief project summaries to validate hands-on Kubernetes orchestration and FastAPI service design.",
+      "tokens_used": 812
+    }
+  },
+
+  "缓存机制": {
+    "说明": "内存 LRU 缓存 + Redis 缓存（加分项）。相同简历重复上传命中缓存，免去重复 AI 调用。Redis 不可用时自动降级为内存缓存，不影响服务可用性。",
+    "实现": "Cache-Aside 模式，TTL 24小时"
+  },
+
+  "技术栈": {
+    "后端": "FastAPI (Python) + 阿里云函数计算 FC",
+    "AI模型": "通义千问 qwen-plus (DashScope SDK)",
+    "PDF解析": "PyMuPDF (fitz)",
+    "缓存": "内存 LRU + Redis (ApsaraDB)",
+    "前端": "React 18 + Vite + GitHub Pages",
+    "部署工具": "Serverless Devs (s.yaml)"
+  }
+}

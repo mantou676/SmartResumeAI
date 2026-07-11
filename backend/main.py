@@ -2,6 +2,7 @@
 FastAPI 应用主入口
 在阿里云 FC 中以 ASGI 模式运行: uvicorn main:app
 """
+from __future__ import annotations
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
@@ -60,16 +61,17 @@ app = FastAPI(
 # ──── CORS 中间件 ────
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",        # Vite 开发服务器
-        "http://localhost:3000",
-        "https://*.github.io",           # GitHub Pages
-    ],
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
     allow_headers=["*"],
     max_age=3600,
 )
+
+# ──── OPTIONS 兜底（FC 代理层可能导致预检返回非 200）──
+@app.options("/{rest_of_path:path}")
+async def preflight_handler():
+    return JSONResponse(status_code=200, content={"message": "OK"})
 
 
 # ──── 全局异常处理 ────
@@ -87,6 +89,18 @@ async def global_exception_handler(request: Request, exc: Exception):
 # ──── 注册路由 ────
 app.include_router(resume.router, prefix="/api", tags=["简历管理"])
 app.include_router(match.router, prefix="/api", tags=["评分匹配"])
+
+
+# ──── 根路径重定向 ────
+@app.get("/")
+async def root():
+    return {
+        "service": "SmartResumeAI",
+        "version": settings.APP_VERSION,
+        "docs": "/docs",
+        "health": "/api/health",
+        "frontend": "https://mantou676.github.io/SmartResumeAI/"
+    }
 
 
 # ──── 健康检查 ────
